@@ -58,8 +58,10 @@ def getStructured(l):
     msg = ' '.join(split_line[1:])          # message = Name: Message
     txt,name = None,None
     if hasName(msg):
-        split_message = msg.split(': ') 
+        split_message = msg.split(': ')
         name = split_message[0]
+        if(name[-1]==':'):
+            name = name[:-1]
         txt = ' '.join(split_message[1:]) 
     else:
         name = None
@@ -73,13 +75,15 @@ Process entire file
 '''
 
 import pandas as pd
+import datetime
+
 def getMessages(path):
     res = [] 
     with open(path, encoding="utf-8") as fp:
         #fp.readline() 
         #since message can be in multiple lines we will use buffer to store consecutive lines
         buffer = [] 
-        date, time, author = None, None, None
+        date, time, name = None, None, None
         while True:
             line = fp.readline() 
             if not line: 
@@ -89,14 +93,21 @@ def getMessages(path):
             # else it's a conti of previous message 
             if hasDate(line):                                           # new message
                 if len(buffer) > 0:                                     # write prev message to buffer
-                    res.append([date, time, author, ' '.join(buffer)]) 
+                    res.append([date, time, name, ' '.join(buffer)]) 
                 buffer.clear()                                          # Clear buffer since we are encountering a new message
-                date, time, author, message = getStructured(line)       # Get structured format and store it 
+                date, time, name, message = getStructured(line)         # Get structured format and store it 
+                # for encryption messages : 4/6/16, 7:00 AM - Messages and calls are end-to-end encrypted.
+                if(name == None):
+                    continue
                 buffer.append(message)                                  # Append message to buffer
             else:
-                res.append([date, time, author, ' '.join(buffer)])                                     # Same message in next line 
-    df = pd.DataFrame(res, columns=['Date', 'Time', 'Author', 'Message'])
-    return df
+                res.append([date, time, name, ' '.join(buffer)])                                     # Same message in next line 
+    df = pd.DataFrame(res, columns=['Date', 'Time', 'Name', 'Message'])
+    #df["Date"] = df["Date"].apply(lambda x: datetime.datetime.strptime(x[1:], "%-m/%-d/%y"))
+    df["Time"] = df["Time"].str.strip()
+    df["Time"] = pd.to_datetime(df["Time"])
+    df["Time"] = df["Time"].apply(lambda x: x.time())
 
+    return df
 # a = getMessages("Notebooks/data/chat.txt")
 # print(a.head())

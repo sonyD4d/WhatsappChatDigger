@@ -95,6 +95,7 @@ def getMessages(path):
                 buffer.append(message)                                  # Append message to buffer
             else:
                 res.append([date, time, author, ' '.join(buffer)])                                     # Same message in next line 
-    df = pd.DataFrame(res, columns=['Date', 'Time', 'Author', 'Message'])
+    df = pd.DataFrame(res, columns=['Date', 'Time', 'Name', 'Message'])
     return df
-
+# a = getMessages("Notebooks/data/chat.txt")
+# print(a.head())
