@@ -103,7 +103,7 @@ def getMessages(path):
             else:
                 res.append([date, time, name, ' '.join(buffer)])                                     # Same message in next line 
     df = pd.DataFrame(res, columns=['Date', 'Time', 'Name', 'Message'])
-    #df["Date"] = df["Date"].apply(lambda x: datetime.datetime.strptime(x[1:], "%-m/%-d/%y"))
+    df["Date"] = df["Date"].apply(lambda x: datetime.datetime.strptime(x.strip(), "%m/%d/%y"))
     df["Time"] = df["Time"].str.strip()
     df["Time"] = pd.to_datetime(df["Time"])
     df["Time"] = df["Time"].apply(lambda x: x.time())
