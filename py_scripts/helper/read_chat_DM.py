@@ -96,7 +96,8 @@ def getMessages(data):
             # else it's a conti of previous message 
         if hasDate(line):                                           # new message
             if len(buffer) > 0:                                     # write prev message to buffer
-                res.append([date, time, name, ' '.join(buffer)]) 
+                month,day,year = date.split('/')
+                res.append([date,day,int(month),year,time, name, ' '.join(buffer)]) 
             buffer.clear()                                          # Clear buffer since we are encountering a new message
             date, time, name, message = getStructured(line)         # Get structured format and store it 
             # for encryption messages : 4/6/16, 7:00 AM - Messages and calls are end-to-end encrypted.
@@ -104,9 +105,13 @@ def getMessages(data):
                 continue
             buffer.append(message)                                  # Append message to buffer
         else:
-            res.append([date, time, name, ' '.join(buffer)])                                     # Same message in next line 
-    df = pd.DataFrame(res, columns=['Date', 'Time', 'Name', 'Message'])
-    
+            month,day,year = date.split('/')
+            res.append([date,day,int(month),year,time, name, ' '.join(buffer)])   
+    print(res[0:5])                                  # Same message in next line 
+    df = pd.DataFrame(res, columns=['Date','Day','Month','Year', 'Time', 'Name', 'Message'])
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    df['Month'] = pd.Categorical(df['Month'], months)
+
     print(df.dtypes)
     return df
 # a = getMessages("Notebooks/data/chat.txt")
